@@ -1,21 +1,45 @@
 import * as Yup from 'yup';
 import Deliveryman from '../models/Deliveryman';
+import File from '../models/File';
 
 class DeliverymanController {
   async index(req, res) {
-    const recipients = await Recipient.findAll();
+    const { page = 1 } = req.query;
 
-    return res.json(recipients);
+    const deliverymen = await Deliveryman.findAll({
+      attributes: ['id', 'name', 'email', 'avatar_id'],
+      limit: 20,
+      offset: (page - 1) * 20,
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
+
+    return res.json(deliverymen);
   }
 
   async show(req, res) {
-    const recipient = await Recipient.findByPk(req.params.id);
+    const deliveryman = await Deliveryman.findOne({
+      where: { id: req.params.id },
+      attributes: ['id', 'name', 'email', 'avatar_id'],
+      include: [
+        {
+          model: File,
+          as: 'avatar',
+          attributes: ['name', 'path', 'url'],
+        },
+      ],
+    });
 
-    if (!recipient) {
-      return res.status(400).json({ error: 'Recipient not found' });
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found' });
     }
 
-    return res.json(recipient);
+    return res.json(deliveryman);
   }
 
   async store(req, res) {
@@ -44,39 +68,35 @@ class DeliverymanController {
   }
 
   async update(req, res) {
-    const schema = Yup.object().shape({
-      name: Yup.string(),
-      street: Yup.string(),
-      number: Yup.string(),
-      complement: Yup.string(),
-      state: Yup.string(),
-      city: Yup.string(),
-      zip_code: Yup.string(),
-    });
+    const deliveryman = await Deliveryman.findByPk(req.params.id);
 
-    if (!(await schema.isValid(req.body))) {
-      return res.status(400).json({ error: 'Fields validation fails' });
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found' });
     }
 
-    const recipient = await Recipient.findByPk(req.params.id);
+    if (req.body.email && req.body.email !== deliveryman.email) {
+      const deliverymanExists = await Deliveryman.findOne({
+        where: req.body.email,
+      });
 
-    if (!recipient) {
-      return res.status(400).json({ error: 'Recipent not found ' });
+      if (deliverymanExists) {
+        return res.status(400).json({ error: 'Deliveryman already exists' });
+      }
     }
 
-    await recipient.update(req.body);
+    const { id, name, email, avatar_id } = await deliveryman.update(req.body);
 
-    return res.json(recipient);
+    return res.json({ id, name, email, avatar_id });
   }
 
   async destroy(req, res) {
-    const recipient = await Recipient.findByPk(req.params.id);
+    const deliveryman = await Deliveryman.findByPk(req.params.id);
 
-    if (!recipient) {
-      return res.status(400).json({ error: 'Recipent not found ' });
+    if (!deliveryman) {
+      return res.status(400).json({ error: 'Deliveryman not found ' });
     }
 
-    await recipient.destroy();
+    await deliveryman.destroy();
 
     return res.send();
   }
