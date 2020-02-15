@@ -1,8 +1,12 @@
 import * as Yup from 'yup';
+
 import Order from '../models/Order';
 import File from '../models/File';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
+
+import NewOrder from '../jobs/NewOrder';
+import Queue from '../../lib/Queue';
 
 class OrderController {
   async index(req, res) {
@@ -17,8 +21,7 @@ class OrderController {
   }
 
   async show(req, res) {
-    const order = await Order.findOne({
-      where: { id: req.params.id },
+    const order = await Order.findByPk(req.params.id, {
       attributes: [
         'id',
         'recipient_id',
@@ -63,7 +66,7 @@ class OrderController {
       recipient_id: Yup.number().required(),
       deliveryman_id: Yup.number().required(),
       signature_id: Yup.number(),
-      product: Yup.string(),
+      product: Yup.string().required(),
       canceled_at: Yup.date(),
       start_date: Yup.date(),
       end_date: Yup.date(),
@@ -87,6 +90,13 @@ class OrderController {
     }
 
     const order = await Order.create(req.body);
+
+    const deliveryman = await Deliveryman.findByPk(deliveryman_id);
+
+    await Queue.add(NewOrder.key, {
+      deliveryman,
+      order,
+    });
 
     return res.json(order);
   }
