@@ -1,8 +1,8 @@
 import { Op } from 'sequelize';
-import Order from '../models/Order';
+import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 
-class DeliveredOrderController {
+class DeliveredController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
@@ -14,7 +14,7 @@ class DeliveredOrderController {
       return res.status(400).json({ error: 'Deliveryman not found' });
     }
 
-    const deliveries = await Order.findAll({
+    const deliveries = await Delivery.findAll({
       where: {
         deliveryman_id: deliverymanId,
         canceled_at: null,
@@ -31,4 +31,4 @@ class DeliveredOrderController {
   }
 }
 
-export default new DeliveredOrderController();
+export default new DeliveredController();

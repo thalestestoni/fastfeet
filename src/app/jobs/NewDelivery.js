@@ -1,23 +1,23 @@
 import Mail from '../../lib/Mail';
 
-class NewOrder {
+class NewDelivery {
   get key() {
-    return 'NewOrder';
+    return 'NewDelivery';
   }
 
   async handle({ data }) {
-    const { deliveryman, order } = data;
+    const { deliveryman, delivery } = data;
 
     await Mail.sendMail({
       to: `${deliveryman.name} <${deliveryman.email}>`,
-      subject: 'New order',
-      template: 'newOrder',
+      subject: 'New Delivery',
+      template: 'newDelivery',
       context: {
         deliveryman: deliveryman.name,
-        product: order.product,
+        product: delivery.product,
       },
     });
   }
 }
 
-export default new NewOrder();
+export default new NewDelivery();

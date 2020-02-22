@@ -1,27 +1,27 @@
 import * as Yup from 'yup';
 
-import Order from '../models/Order';
+import Delivery from '../models/Delivery';
 import File from '../models/File';
 import Recipient from '../models/Recipient';
 import Deliveryman from '../models/Deliveryman';
 
-import NewOrder from '../jobs/NewOrder';
+import NewDelivery from '../jobs/NewDelivery';
 import Queue from '../../lib/Queue';
 
-class OrderController {
+class DeliveryController {
   async index(req, res) {
     const { page = 1 } = req.query;
 
-    const order = await Order.findAll({
+    const delivery = await Delivery.findAll({
       limit: 20,
       offset: (page - 1) * 20,
     });
 
-    return res.json(order);
+    return res.json(delivery);
   }
 
   async show(req, res) {
-    const order = await Order.findByPk(req.params.id, {
+    const delivery = await Delivery.findByPk(req.params.id, {
       attributes: [
         'id',
         'recipient_id',
@@ -54,11 +54,11 @@ class OrderController {
       ],
     });
 
-    if (!order) {
-      return res.status(400).json({ error: 'Order not found' });
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found' });
     }
 
-    return res.json(order);
+    return res.json(delivery);
   }
 
   async store(req, res) {
@@ -89,34 +89,34 @@ class OrderController {
       return res.status(400).json({ error: 'Delivery man does not exists' });
     }
 
-    const order = await Order.create(req.body);
+    const delivery = await Delivery.create(req.body);
 
     const deliveryman = await Deliveryman.findByPk(deliveryman_id);
 
-    await Queue.add(NewOrder.key, {
+    await Queue.add(NewDelivery.key, {
       deliveryman,
-      order,
+      delivery,
     });
 
-    return res.json(order);
+    return res.json(delivery);
   }
 
   async update(req, res) {
-    const order = await Order.findByPk(req.params.id);
+    const delivery = await Delivery.findByPk(req.params.id);
 
-    if (!order) {
-      return res.status(400).json({ error: 'Order not found' });
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found' });
     }
 
-    if (order.end_date) {
+    if (delivery.end_date) {
       return res.status(401).json({
-        error: 'You cannot update a order that has already been completed',
+        error: 'You cannot update a delivery that has already been completed',
       });
     }
 
-    if (order.canceled_at) {
+    if (delivery.canceled_at) {
       return res.status(401).json({
-        error: 'You cannot update a order that is canceled',
+        error: 'You cannot update a delivery that is canceled',
       });
     }
 
@@ -148,22 +148,22 @@ class OrderController {
       }
     }
 
-    await order.update(req.body);
+    await delivery.update(req.body);
 
-    return res.json(order);
+    return res.json(delivery);
   }
 
   async destroy(req, res) {
-    const order = await Order.findByPk(req.params.id);
+    const delivery = await Delivery.findByPk(req.params.id);
 
-    if (!order) {
-      return res.status(400).json({ error: 'Order not found ' });
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found ' });
     }
 
-    await order.destroy();
+    await delivery.destroy();
 
     return res.send();
   }
 }
 
-export default new OrderController();
+export default new DeliveryController();

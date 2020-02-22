@@ -1,10 +1,8 @@
-import Order from '../models/Order';
+import Delivery from '../models/Delivery';
 import Deliveryman from '../models/Deliveryman';
 
-class DeliveryOrderController {
+class DeliverymanDeliveriesOrderController {
   async index(req, res) {
-    const { page = 1 } = req.query;
-
     const { deliverymanId } = req.params;
 
     const deliverymanExists = await Deliveryman.findByPk(deliverymanId);
@@ -13,7 +11,9 @@ class DeliveryOrderController {
       return res.status(400).json({ error: 'Deliveryman not found' });
     }
 
-    const orders = await Order.findAll({
+    const { page = 1 } = req.query;
+
+    const deliveries = await Delivery.findAll({
       where: {
         deliveryman_id: deliverymanId,
         canceled_at: null,
@@ -24,8 +24,8 @@ class DeliveryOrderController {
       order: [['created_at', 'ASC']],
     });
 
-    return res.json(orders);
+    return res.json(deliveries);
   }
 }
 
-export default new DeliveryOrderController();
+export default new DeliverymanDeliveriesOrderController();

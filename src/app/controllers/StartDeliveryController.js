@@ -1,5 +1,5 @@
 import * as Yup from 'yup';
-import Order from '../models/Order';
+import Delivery from '../models/Delivery';
 
 class StartOrderController {
   async update(req, res) {
@@ -11,19 +11,19 @@ class StartOrderController {
       return res.status(400).json({ error: 'Fields validation fails' });
     }
 
-    const { orderId } = req.params;
+    const { deliveryId } = req.params;
 
-    const order = await Order.findByPk(orderId, {
+    const delivery = await Delivery.findByPk(deliveryId, {
       attributes: ['id', 'product', 'start_date', 'end_date'],
     });
 
-    if (!order) {
-      return res.status(400).json({ error: 'Order not found' });
+    if (!delivery) {
+      return res.status(400).json({ error: 'Delivery not found' });
     }
 
-    await order.update(req.body);
+    await delivery.update(req.body);
 
-    return res.json(order);
+    return res.json(delivery);
   }
 }
 
