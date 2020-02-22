@@ -9,8 +9,8 @@ import DeliverymanController from './app/controllers/DeliverymanController';
 import DeliveryController from './app/controllers/DeliveryController';
 import DeliveredController from './app/controllers/DeliveredController';
 import DeliverymanDeliveriesController from './app/controllers/DeliverymanDeliveriesController';
-import StartDeliveryController from './app/controllers/StartDeliveryController';
-import EndDeliveryController from './app/controllers/EndDeliveryController';
+import DeliveryStartController from './app/controllers/DeliveryStartController';
+import DeliveryEndController from './app/controllers/DeliveryEndController';
 import ProblemDeliveryController from './app/controllers/ProblemDeliveryController';
 
 import authMiddleware from './app/middlewares/auth';
@@ -35,10 +35,13 @@ routes.get(
   DeliverymanDeliveriesController.index
 );
 
-routes.get('/deliveryman/:deliverymanId/deliveries', DeliveredController.index);
+routes.get(
+  '/deliveryman/:deliverymanId/delivered/deliveries',
+  DeliveredController.index
+);
 
-routes.put('/orders/:orderId/status/start', StartDeliveryController.update);
-routes.put('/orders/:orderId/status/end', EndDeliveryController.update);
+routes.put('/delivery/:deliveryId/start', DeliveryStartController.update);
+routes.put('/delivery/:deliveryId/end', DeliveryEndController.update);
 
 routes.use(adminMiddleware);
 
