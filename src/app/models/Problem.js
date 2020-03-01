@@ -8,6 +8,7 @@ class Problem extends Model {
       },
       {
         sequelize,
+        tableName: 'delivery_problems',
       }
     );
 
